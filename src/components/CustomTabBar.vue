@@ -1,5 +1,5 @@
 <template>
-  <div class="tab-bar">
+  <div class="tab-bar" :style="{ backgroundImage: `url(${tabbarBackground})` }">
     <div class="tab-bar-border"></div>
     <div 
       v-for="(item, index) in list" 
@@ -29,6 +29,15 @@
 import { ref, onMounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 
+// 直接导入图片资源
+import examplesIcon from '@/assets/icons/examples.png'
+import examplesActiveIcon from '@/assets/icons/examples-active.png'
+import freeDiancai6Icon from '@/assets/free_diancai_6.png'
+import imageGenerateEdit1Icon from '@/assets/image_generate_edit_1.png'
+import businessIcon from '@/assets/icons/business.png'
+import businessActiveIcon from '@/assets/icons/business-active.png'
+import tabbarBackground from '@/assets/tabbar-background.png'
+
 const router = useRouter()
 const route = useRoute()
 
@@ -37,26 +46,26 @@ const list = ref([
   {
     pagePath: '/notification',
     text: '通知',
-    iconPath: '../../assets/icons/examples.png',
-    selectedIconPath: '../../assets/icons/examples-active.png'
+    iconPath: examplesIcon,
+    selectedIconPath: examplesActiveIcon
   },
   {
     pagePath: '/qing-female/index',
     text: '翻牌子',
-    iconPath: '../../assets/free_diancai_6.png',
-    selectedIconPath: '../../assets/free_diancai_6.png'
+    iconPath: freeDiancai6Icon,
+    selectedIconPath: freeDiancai6Icon
   },
   {
     pagePath: '/import-dishes',
     text: '菜菜悬赏',
-    iconPath: '../../assets/image_generate_edit_1.png',
-    selectedIconPath: '../../assets/image_generate_edit_1.png'
+    iconPath: imageGenerateEdit1Icon,
+    selectedIconPath: imageGenerateEdit1Icon
   },
   {
     pagePath: '/qing-male/index',
     text: '厨师',
-    iconPath: '../../assets/icons/business.png',
-    selectedIconPath: '../../assets/icons/business-active.png'
+    iconPath: businessIcon,
+    selectedIconPath: businessActiveIcon
   }
 ])
 
@@ -99,7 +108,7 @@ watch(
   left: 0;
   right: 0;
   height: 220rpx;
-  background: url('/src/assets/tabbar-background.png') no-repeat center top;
+  background: no-repeat center top;
   background-size: 100% auto;
   display: flex;
   padding-bottom: env(safe-area-inset-bottom);

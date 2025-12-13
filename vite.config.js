@@ -12,6 +12,7 @@ export default defineConfig({
       '@': resolve(__dirname, 'src')
     }
   },
+  assetsInclude: ['**/*.png', '**/*.jpg', '**/*.jpeg', '**/*.svg', '**/*.gif'],
   server: {
     port: 3000,
     host: true,
@@ -51,12 +52,13 @@ export default defineConfig({
     outDir: 'dist',
     assetsDir: 'assets',
     minify: 'terser',
+    assetsInlineLimit: 0, // 禁止所有资源内联，确保所有图片都输出为单独文件
     // 配置资源预加载和动态导入的基础路径
     rollupOptions: {
       output: {
         // 适配腾讯云开发，简化资源文件名，避免特殊字符和哈希导致的匹配问题
         manualChunks: undefined,
-        // 图片文件名不加哈希，避免匹配失败
+        // 简化assetFileNames配置，确保所有图片都能被正确输出
         assetFileNames: 'assets/[name].[ext]',
         // 简化JS文件名，保留短哈希
         chunkFileNames: 'assets/[name]-[hash:6].js',
