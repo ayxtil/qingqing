@@ -19,6 +19,7 @@
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.1.4",
+    "postcss-px-to-viewport-8-plugin": "^1.2.5",
     "terser": "^5.44.1",
     "vite": "^5.4.21"
   }
