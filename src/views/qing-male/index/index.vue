@@ -657,7 +657,7 @@ const deleteDish = (dish) => {
 .owed-counter {
   position: fixed;
   right: 40rpx;
-  bottom: 165rpx;
+  bottom: 180rpx;
   display: flex;
   flex-direction: column;
   align-items: center;
