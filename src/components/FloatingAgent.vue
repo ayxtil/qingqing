@@ -448,16 +448,16 @@ onUnmounted(() => {
 
 .btn-image {
   width: 100%;
-  height: 100%;
-  object-fit: cover;
+  aspect-ratio: 1 / 1;
+  object-fit: contain;
   transition: all 0.3s ease;
 }
 
 .agent-avatar {
   width: 96rpx;
-  height: 96rpx;
+  aspect-ratio: 1 / 1;
   border-radius: 50%;
-  object-fit: cover;
+  object-fit: contain;
 }
 
 .badge {
@@ -521,7 +521,7 @@ onUnmounted(() => {
 
 .header-left .agent-avatar {
   width: 60rpx;
-  height: 60rpx;
+  aspect-ratio: 1 / 1;
   margin-right: 20rpx;
 }
 
@@ -629,17 +629,17 @@ onUnmounted(() => {
 
 .user-avatar {
   width: 50rpx;
-  height: 50rpx;
+  aspect-ratio: 1 / 1;
   border-radius: 50%;
-  object-fit: cover;
+  object-fit: contain;
   margin-left: 10rpx;
 }
 
 .agent-message .agent-avatar {
   width: 50rpx;
-  height: 50rpx;
+  aspect-ratio: 1 / 1;
   border-radius: 50%;
-  object-fit: cover;
+  object-fit: contain;
   margin-right: 10rpx;
 }
 
@@ -653,9 +653,9 @@ onUnmounted(() => {
 
 .loading-icon {
   width: 40rpx;
-  height: 40rpx;
+  aspect-ratio: 1 / 1;
   border-radius: 50%;
-  object-fit: cover;
+  object-fit: contain;
   margin-right: 10rpx;
 }
 

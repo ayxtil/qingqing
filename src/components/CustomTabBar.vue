@@ -138,7 +138,8 @@ watch(
 
 .tab-bar-item-image {
   width: 40rpx;
-  height: 40rpx;
+  aspect-ratio: 1 / 1;
+  object-fit: contain;
   margin-bottom: 8rpx;
   pointer-events: auto; /* 图标响应点击 */
 }
@@ -146,7 +147,8 @@ watch(
 /* 菜菜悬赏图标放大 */
 .tab-bar-item-image-large {
   width: 44rpx;
-  height: 44rpx;
+  aspect-ratio: 1 / 1;
+  object-fit: contain;
 }
 
 .tab-bar-item-text {

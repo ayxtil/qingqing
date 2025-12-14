@@ -695,7 +695,7 @@ const onImageError = (event, dish) => {
 
 .search-icon {
   width: 40rpx;
-  height: 40rpx;
+  aspect-ratio: 1 / 1;
   margin-right: 20rpx;
   object-fit: contain;
 }
@@ -852,7 +852,7 @@ const onImageError = (event, dish) => {
 
 .dish-image {
   width: 100%;
-  height: 200rpx;
+  aspect-ratio: 4 / 3;
   object-fit: cover;
 }
 
@@ -893,9 +893,10 @@ const onImageError = (event, dish) => {
 
 .price-icon {
   width: 42rpx;
-  height: 42rpx;
+  aspect-ratio: 1 / 1;
   margin-right: 10rpx;
   vertical-align: middle;
+  object-fit: contain;
 }
 
 .price-text {
@@ -907,7 +908,7 @@ const onImageError = (event, dish) => {
 /* 添加到购物车按钮 */
 .add-to-cart-btn {
   width: 60rpx;
-  height: 60rpx;
+  aspect-ratio: 1 / 1;
   background-color: transparent;
   border-radius: 50%;
   display: flex;
@@ -925,7 +926,7 @@ const onImageError = (event, dish) => {
 
 .add-icon {
   width: 54rpx;
-  height: 54rpx;
+  aspect-ratio: 1 / 1;
   object-fit: contain;
   line-height: 1;
 }
@@ -936,7 +937,7 @@ const onImageError = (event, dish) => {
   right: 40rpx;
   bottom: 165rpx;
   width: 120rpx;
-  height: 120rpx;
+  aspect-ratio: 1 / 1;
   background: url('../../../assets/design_icon_1.png') no-repeat center center;
   background-size: contain;
   cursor: pointer;
@@ -1060,7 +1061,7 @@ const onImageError = (event, dish) => {
 /* 商品图片 */
 .item-image {
   width: 120rpx;
-  height: 120rpx;
+  aspect-ratio: 1 / 1;
   border-radius: 10rpx;
   overflow: hidden;
   margin-right: 20rpx;

@@ -578,9 +578,10 @@ const deleteDish = (dish) => {
 
 .price-icon {
   width: 42rpx;
-  height: 42rpx;
+  aspect-ratio: 1 / 1;
   margin-right: 10rpx;
   vertical-align: middle;
+  object-fit: contain;
 }
 
 /* 自定义确认框样式 */
@@ -679,10 +680,11 @@ const deleteDish = (dish) => {
 
 .counter-icon {
   width: 60rpx;
-  height: 60rpx;
+  aspect-ratio: 1 / 1;
   margin-bottom: 2rpx;
   vertical-align: middle;
   line-height: 1;
+  object-fit: contain;
 }
 
 .counter-text {
