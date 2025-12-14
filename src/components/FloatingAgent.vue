@@ -420,7 +420,7 @@ onUnmounted(() => {
 <style scoped>
 .floating-agent-container {
   position: fixed;
-  bottom: 305rpx;
+  bottom: 280rpx;
   right: -30rpx; /* 部分超出屏幕边缘，实现25%隐藏效果 */
   z-index: 100;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
@@ -428,8 +428,8 @@ onUnmounted(() => {
 
 /* 悬浮形象按钮 */
 .floating-btn {
-  width: 120rpx;
-  height: 120rpx;
+  width: 140rpx;
+  height: 140rpx;
   background-color: transparent;
   border-radius: 50%;
   display: flex;
@@ -447,7 +447,7 @@ onUnmounted(() => {
 }
 
 .btn-image {
-  width: 100%;
+  width: 90%;
   aspect-ratio: 1 / 1;
   object-fit: contain;
   transition: all 0.3s ease;

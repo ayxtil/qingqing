@@ -108,8 +108,8 @@ watch(
   left: 0;
   right: 0;
   height: 220rpx;
-  background: no-repeat center top;
-  background-size: 100% auto;
+  background: no-repeat center center;
+  background-size: 100% 100%;
   display: flex;
   padding-bottom: env(safe-area-inset-bottom);
   z-index: 1000;
@@ -132,12 +132,12 @@ watch(
   align-items: center;
   height: 100%;
   background: transparent;
-  padding-bottom: 35rpx;
+  padding-bottom: 45rpx;
   pointer-events: none; /* 导航项容器不响应点击，只让图标和文字响应 */
 }
 
 .tab-bar-item-image {
-  width: 40rpx;
+  width: 50rpx;
   aspect-ratio: 1 / 1;
   object-fit: contain;
   margin-bottom: 8rpx;
@@ -146,7 +146,7 @@ watch(
 
 /* 菜菜悬赏图标放大 */
 .tab-bar-item-image-large {
-  width: 44rpx;
+  width: 54rpx;
   aspect-ratio: 1 / 1;
   object-fit: contain;
 }
