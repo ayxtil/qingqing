@@ -420,16 +420,16 @@ onUnmounted(() => {
 <style scoped>
 .floating-agent-container {
   position: fixed;
-  bottom: 280rpx;
-  right: -30rpx; /* 部分超出屏幕边缘，实现25%隐藏效果 */
-  z-index: 100;
+  bottom: 120px;
+  right: -10px; /* 部分超出屏幕边缘，实现25%隐藏效果 */
+  z-index: 9998;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 }
 
 /* 悬浮形象按钮 */
 .floating-btn {
-  width: 140rpx;
-  height: 140rpx;
+  width: 50px;
+  height: 50px;
   background-color: transparent;
   border-radius: 50%;
   display: flex;
@@ -438,12 +438,13 @@ onUnmounted(() => {
   cursor: pointer;
   transition: all 0.3s ease;
   transform: rotate(-60deg); /* 待机状态逆时针旋转60度 */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .floating-btn:hover,
 .floating-btn:active {
   transform: rotate(0deg) scale(1.1); /* 悬停和点击时恢复正常旋转角度并放大 */
-  margin-right: 30rpx; /* 完全移入屏幕内 */
+  margin-right: 10px; /* 完全移入屏幕内 */
 }
 
 .btn-image {
@@ -454,7 +455,7 @@ onUnmounted(() => {
 }
 
 .agent-avatar {
-  width: 96rpx;
+  width: 32px;
   aspect-ratio: 1 / 1;
   border-radius: 50%;
   object-fit: contain;
@@ -462,19 +463,19 @@ onUnmounted(() => {
 
 .badge {
   position: absolute;
-  top: -10rpx;
-  left: 10rpx; /* 调整徽章位置，适应半隐藏状态 */
+  top: -3px;
+  left: 3px; /* 调整徽章位置，适应半隐藏状态 */
   background-color: #FF8090;
   color: #fff;
-  font-size: 20rpx;
+  font-size: 10px;
   font-weight: bold;
-  min-width: 30rpx;
-  height: 30rpx;
-  border-radius: 15rpx;
+  min-width: 15px;
+  height: 15px;
+  border-radius: 8px;
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 0 8rpx;
+  padding: 0 4px;
   transform: rotate(60deg); /* 徽章旋转回正常角度，与旋转的按钮形成对比 */
   transition: all 0.3s ease;
 }
@@ -483,7 +484,7 @@ onUnmounted(() => {
 .floating-btn:active .badge {
   transform: rotate(0deg); /* 悬停和点击时徽章恢复正常角度 */
   left: auto;
-  right: -10rpx; /* 恢复正常位置 */
+  right: -3px; /* 恢复正常位置 */
 }
 
 /* 聊天面板 */
@@ -520,13 +521,13 @@ onUnmounted(() => {
 }
 
 .header-left .agent-avatar {
-  width: 60rpx;
+  width: 20px;
   aspect-ratio: 1 / 1;
-  margin-right: 20rpx;
+  margin-right: 8px;
 }
 
 .agent-name {
-  font-size: 36rpx;
+  font-size: 12px;
   font-weight: bold;
   color: #4A4A4A;
   display: flex;
@@ -540,15 +541,15 @@ onUnmounted(() => {
 }
 
 .minimize-btn, .close-btn {
-  width: 50rpx;
-  height: 50rpx;
+  width: 18px;
+  height: 18px;
   display: flex;
   justify-content: center;
   align-items: center;
-  font-size: 40rpx;
+  font-size: 14px;
   color: #666;
   cursor: pointer;
-  margin-left: 20rpx;
+  margin-left: 8px;
   border-radius: 50%;
   transition: all 0.3s ease;
 }
@@ -628,19 +629,19 @@ onUnmounted(() => {
 }
 
 .user-avatar {
-  width: 50rpx;
+  width: 16px;
   aspect-ratio: 1 / 1;
   border-radius: 50%;
   object-fit: contain;
-  margin-left: 10rpx;
+  margin-left: 4px;
 }
 
 .agent-message .agent-avatar {
-  width: 50rpx;
+  width: 16px;
   aspect-ratio: 1 / 1;
   border-radius: 50%;
   object-fit: contain;
-  margin-right: 10rpx;
+  margin-right: 4px;
 }
 
 /* 加载中提示 */
@@ -648,19 +649,19 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 15rpx 0;
+  padding: 6px 0;
 }
 
 .loading-icon {
-  width: 40rpx;
+  width: 14px;
   aspect-ratio: 1 / 1;
   border-radius: 50%;
   object-fit: contain;
-  margin-right: 10rpx;
+  margin-right: 4px;
 }
 
 .loading-text {
-  font-size: 28rpx;
+  font-size: 10px;
   color: #A0A0A0;
 }
 
@@ -671,37 +672,37 @@ onUnmounted(() => {
 
 /* 输入区域 */
 .input-area {
-  padding: 20rpx;
+  padding: 8px;
   background-color: #FFD6E0;
-  border-top: 2rpx solid #FFB3C6;
+  border-top: 1px solid #FFB3C6;
 }
 
 .input-wrapper {
   display: flex;
   align-items: center;
   background-color: #FFFFFF;
-  border-radius: 30rpx;
-  padding: 0 20rpx;
-  margin-bottom: 15rpx;
+  border-radius: 12px;
+  padding: 0 8px;
+  margin-bottom: 6px;
 }
 
 .message-input {
   flex: 1;
-  height: 80rpx;
-  font-size: 30rpx;
+  height: 32px;
+  font-size: 12px;
   border: none;
   outline: none;
-  padding: 0 10rpx;
+  padding: 0 4px;
 }
 
 .send-btn {
-  width: 120rpx;
-  height: 60rpx;
+  width: 48px;
+  height: 24px;
   background-color: #FF8090;
   color: #fff;
   border: none;
-  border-radius: 30rpx;
-  font-size: 28rpx;
+  border-radius: 12px;
+  font-size: 10px;
   cursor: pointer;
   transition: all 0.3s ease;
 }

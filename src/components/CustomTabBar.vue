@@ -107,16 +107,17 @@ watch(
   bottom: 0;
   left: 0;
   right: 0;
-  height: 220rpx;
+  height: 70px;
   background: no-repeat center center;
   background-size: 100% 100%;
   display: flex;
   padding-bottom: env(safe-area-inset-bottom);
-  z-index: 1000;
+  z-index: 9999;
   border: none;
-  filter: drop-shadow(0 5rpx 30rpx rgba(0, 0, 0, 0.6));
+  filter: drop-shadow(0 2px 10px rgba(0, 0, 0, 0.6));
   transition: all 0.3s ease;
   pointer-events: none; /* 导航栏容器不拦截点击事件，实现点击穿透 */
+  transform: translateZ(0);
 }
 
 .tab-bar-border {
@@ -132,27 +133,27 @@ watch(
   align-items: center;
   height: 100%;
   background: transparent;
-  padding-bottom: 45rpx;
+  padding-bottom: 15px;
   pointer-events: none; /* 导航项容器不响应点击，只让图标和文字响应 */
 }
 
 .tab-bar-item-image {
-  width: 50rpx;
+  width: 24px;
   aspect-ratio: 1 / 1;
   object-fit: contain;
-  margin-bottom: 8rpx;
+  margin-bottom: 3px;
   pointer-events: auto; /* 图标响应点击 */
 }
 
 /* 菜菜悬赏图标放大 */
 .tab-bar-item-image-large {
-  width: 54rpx;
+  width: 26px;
   aspect-ratio: 1 / 1;
   object-fit: contain;
 }
 
 .tab-bar-item-text {
-  font-size: 24rpx;
+  font-size: 12px;
   color: white;
   text-shadow: 1px 1px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000;
   pointer-events: auto; /* 文字响应点击 */
