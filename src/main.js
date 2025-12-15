@@ -1,7 +1,9 @@
 import { createApp } from 'vue'
 import App from './App.vue'
-// 使用完整路径和扩展名导入路由模块，避免浏览器请求目录
-import router from './router/index.js'
+// 路由导入，让Vite在构建时处理
+import router from './router'
+// 重新添加CSS导入，让Vite在构建时处理所有样式
+import './style.css'
 
 const app = createApp(App)
 

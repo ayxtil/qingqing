@@ -62,13 +62,12 @@ export default defineConfig({
     // 配置资源预加载和动态导入的基础路径
     rollupOptions: {
       output: {
-        // 适配腾讯云开发，简化资源文件名，避免特殊字符和哈希导致的匹配问题
+        // 确保所有模块都被正确打包，避免运行时请求源码
         manualChunks: undefined,
-        // 简化assetFileNames配置，确保所有图片都能被正确输出
-        assetFileNames: 'assets/[name].[ext]',
-        // 简化JS文件名，保留短哈希
-        chunkFileNames: 'assets/[name]-[hash:6].js',
-        entryFileNames: 'assets/[name]-[hash:6].js',
+        // 确保生成的文件名包含哈希，避免缓存问题
+        assetFileNames: 'assets/[name].[hash:8].[ext]',
+        chunkFileNames: 'assets/[name].[hash:8].js',
+        entryFileNames: 'assets/[name].[hash:8].js',
         // 自动过滤中文/空格/括号，替换为下划线
         sanitizeFileName: (name) => {
           return name.replace(/[\u4e00-\u9fa5\s\(\)]/g, '_');

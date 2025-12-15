@@ -25,8 +25,7 @@
       background-color: #ffffff;
     }
   </style>
-  <!-- 使用link标签导入CSS，避免MIME类型错误 -->
-  <link rel="stylesheet" href="./src/style.css">
+  <!-- 移除直接的CSS引用，让Vite在构建时处理所有样式 -->
   
   <!-- Import Map：解决浏览器无法解析裸模块名的问题 -->
   <!-- 开发环境下，Vite会自动忽略此配置，使用自己的模块解析 -->
