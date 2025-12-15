@@ -935,11 +935,11 @@ const onImageError = (event, dish) => {
 .fab {
   position: fixed;
   right: 40rpx;
-  bottom: 180rpx;
+  bottom: 165rpx;
   width: 120rpx;
   aspect-ratio: 1 / 1;
   background: url('../../../assets/design_icon_1.png') no-repeat center center;
-  background-size: 100% 100%;
+  background-size: contain;
   cursor: pointer;
   transition: all 0.3s ease;
   z-index: 100;
@@ -974,7 +974,7 @@ const onImageError = (event, dish) => {
 /* 购物车面板 */
 .cart-panel {
   position: fixed;
-  bottom: 170rpx;
+  bottom: 150rpx;
   left: 0;
   right: 0;
   background-color: #E6E6FA; /* 马卡龙淡紫色 */

@@ -420,16 +420,16 @@ onUnmounted(() => {
 <style scoped>
 .floating-agent-container {
   position: fixed;
-  bottom: 120px;
-  right: -10px; /* 部分超出屏幕边缘，实现25%隐藏效果 */
-  z-index: 9998;
+  bottom: 305rpx;
+  right: -30rpx; /* 部分超出屏幕边缘，实现25%隐藏效果 */
+  z-index: 100;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 }
 
 /* 悬浮形象按钮 */
 .floating-btn {
-  width: 50px;
-  height: 50px;
+  width: 120rpx;
+  height: 120rpx;
   background-color: transparent;
   border-radius: 50%;
   display: flex;
@@ -438,24 +438,23 @@ onUnmounted(() => {
   cursor: pointer;
   transition: all 0.3s ease;
   transform: rotate(-60deg); /* 待机状态逆时针旋转60度 */
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .floating-btn:hover,
 .floating-btn:active {
   transform: rotate(0deg) scale(1.1); /* 悬停和点击时恢复正常旋转角度并放大 */
-  margin-right: 10px; /* 完全移入屏幕内 */
+  margin-right: 30rpx; /* 完全移入屏幕内 */
 }
 
 .btn-image {
-  width: 90%;
+  width: 100%;
   aspect-ratio: 1 / 1;
   object-fit: contain;
   transition: all 0.3s ease;
 }
 
 .agent-avatar {
-  width: 32px;
+  width: 96rpx;
   aspect-ratio: 1 / 1;
   border-radius: 50%;
   object-fit: contain;
@@ -463,19 +462,19 @@ onUnmounted(() => {
 
 .badge {
   position: absolute;
-  top: -3px;
-  left: 3px; /* 调整徽章位置，适应半隐藏状态 */
+  top: -10rpx;
+  left: 10rpx; /* 调整徽章位置，适应半隐藏状态 */
   background-color: #FF8090;
   color: #fff;
-  font-size: 10px;
+  font-size: 20rpx;
   font-weight: bold;
-  min-width: 15px;
-  height: 15px;
-  border-radius: 8px;
+  min-width: 30rpx;
+  height: 30rpx;
+  border-radius: 15rpx;
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 0 4px;
+  padding: 0 8rpx;
   transform: rotate(60deg); /* 徽章旋转回正常角度，与旋转的按钮形成对比 */
   transition: all 0.3s ease;
 }
@@ -484,7 +483,7 @@ onUnmounted(() => {
 .floating-btn:active .badge {
   transform: rotate(0deg); /* 悬停和点击时徽章恢复正常角度 */
   left: auto;
-  right: -3px; /* 恢复正常位置 */
+  right: -10rpx; /* 恢复正常位置 */
 }
 
 /* 聊天面板 */
@@ -521,13 +520,13 @@ onUnmounted(() => {
 }
 
 .header-left .agent-avatar {
-  width: 20px;
+  width: 60rpx;
   aspect-ratio: 1 / 1;
-  margin-right: 8px;
+  margin-right: 20rpx;
 }
 
 .agent-name {
-  font-size: 12px;
+  font-size: 36rpx;
   font-weight: bold;
   color: #4A4A4A;
   display: flex;
@@ -541,15 +540,15 @@ onUnmounted(() => {
 }
 
 .minimize-btn, .close-btn {
-  width: 18px;
-  height: 18px;
+  width: 50rpx;
+  height: 50rpx;
   display: flex;
   justify-content: center;
   align-items: center;
-  font-size: 14px;
+  font-size: 40rpx;
   color: #666;
   cursor: pointer;
-  margin-left: 8px;
+  margin-left: 20rpx;
   border-radius: 50%;
   transition: all 0.3s ease;
 }
@@ -629,19 +628,19 @@ onUnmounted(() => {
 }
 
 .user-avatar {
-  width: 16px;
+  width: 50rpx;
   aspect-ratio: 1 / 1;
   border-radius: 50%;
   object-fit: contain;
-  margin-left: 4px;
+  margin-left: 10rpx;
 }
 
 .agent-message .agent-avatar {
-  width: 16px;
+  width: 50rpx;
   aspect-ratio: 1 / 1;
   border-radius: 50%;
   object-fit: contain;
-  margin-right: 4px;
+  margin-right: 10rpx;
 }
 
 /* 加载中提示 */
@@ -649,19 +648,19 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 6px 0;
+  padding: 15rpx 0;
 }
 
 .loading-icon {
-  width: 14px;
+  width: 40rpx;
   aspect-ratio: 1 / 1;
   border-radius: 50%;
   object-fit: contain;
-  margin-right: 4px;
+  margin-right: 10rpx;
 }
 
 .loading-text {
-  font-size: 10px;
+  font-size: 28rpx;
   color: #A0A0A0;
 }
 
@@ -672,37 +671,37 @@ onUnmounted(() => {
 
 /* 输入区域 */
 .input-area {
-  padding: 8px;
+  padding: 20rpx;
   background-color: #FFD6E0;
-  border-top: 1px solid #FFB3C6;
+  border-top: 2rpx solid #FFB3C6;
 }
 
 .input-wrapper {
   display: flex;
   align-items: center;
   background-color: #FFFFFF;
-  border-radius: 12px;
-  padding: 0 8px;
-  margin-bottom: 6px;
+  border-radius: 30rpx;
+  padding: 0 20rpx;
+  margin-bottom: 15rpx;
 }
 
 .message-input {
   flex: 1;
-  height: 32px;
-  font-size: 12px;
+  height: 80rpx;
+  font-size: 30rpx;
   border: none;
   outline: none;
-  padding: 0 4px;
+  padding: 0 10rpx;
 }
 
 .send-btn {
-  width: 48px;
-  height: 24px;
+  width: 120rpx;
+  height: 60rpx;
   background-color: #FF8090;
   color: #fff;
   border: none;
-  border-radius: 12px;
-  font-size: 10px;
+  border-radius: 30rpx;
+  font-size: 28rpx;
   cursor: pointer;
   transition: all 0.3s ease;
 }

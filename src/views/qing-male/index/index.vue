@@ -656,47 +656,47 @@ const deleteDish = (dish) => {
 /* 已欠亲亲计数器 */
 .owed-counter {
   position: fixed;
-  right: 16px;
-  bottom: 70px;
+  right: 40rpx;
+  bottom: 165rpx;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
+  width: 120rpx;
+  height: 120rpx;
   background-color: #FF8090;
   border-radius: 50%;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 5rpx 20rpx rgba(0, 0, 0, 0.6);
   transition: all 0.3s ease;
-  z-index: 9998;
+  z-index: 100;
   cursor: default;
   box-sizing: border-box;
 }
 
 .owed-counter:hover {
   transform: scale(1.1);
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.7);
+  box-shadow: 0 8rpx 25rpx rgba(0, 0, 0, 0.7);
 }
 
 .counter-icon {
-  width: 20px;
+  width: 60rpx;
   aspect-ratio: 1 / 1;
-  margin-bottom: 1px;
+  margin-bottom: 2rpx;
   vertical-align: middle;
   line-height: 1;
   object-fit: contain;
 }
 
 .counter-text {
-  font-size: 8px;
+  font-size: 22rpx;
   color: #fff;
   font-weight: bold;
-  margin-bottom: 1px;
+  margin-bottom: 2rpx;
   line-height: 1;
 }
 
 .counter-value {
-  font-size: 12px;
+  font-size: 30rpx;
   color: #fff;
   font-weight: bold;
   line-height: 1;

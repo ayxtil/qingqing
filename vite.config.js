@@ -5,7 +5,7 @@ import { resolve } from 'path'
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  base: './',
+  base: '/qingqing/',
   plugins: [vue()],
   resolve: {
     alias: {
@@ -14,8 +14,14 @@ export default defineConfig({
   },
   assetsInclude: ['**/*.png', '**/*.jpg', '**/*.jpeg', '**/*.svg', '**/*.gif'],
   server: {
-    port: 3000,
-    host: true,
+    port: 8080,
+    host: '0.0.0.0',
+    allowedHosts: [
+      '6sf7724gq589.vicp.fun',
+      'localhost',
+      '127.0.0.1'
+    ],
+    cors: true,
     // 添加代理配置，解决Coze API的CORS问题
     proxy: {
       '/api/coze': {

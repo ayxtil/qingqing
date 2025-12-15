@@ -6,6 +6,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "vite",
+    "dev:host": "vite --host 0.0.0.0 --port 8080",
     "build": "vite build || exit 0",
     "preview": "vite preview"
   },
