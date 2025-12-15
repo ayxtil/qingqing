@@ -43,7 +43,8 @@
   <div id="app"></div>
   
   <!-- 开发环境：通过 Vite 服务器访问时，此脚本会被 Vite 替换为构建后的脚本 -->
-  <!-- 直接打开时，浏览器会使用 Import Map 解析裸模块 -->
+  <!-- 生产环境：请访问 dist/index.html，该文件包含构建后的脚本 -->
+  <!-- 直接打开此文件会导致错误，因为浏览器无法直接执行 .vue 源文件 -->
   <script type="module" src="./src/main.js"></script>
 </body>
 </html>
