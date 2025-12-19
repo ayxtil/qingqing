@@ -24,18 +24,28 @@
         <button class="modal-btn" @click="showModal = false">准了</button>
       </div>
     </div>
+    
+    <!-- 等待弹窗 -->
+    <div v-if="isLoading" class="loading-modal">
+      <div class="loading-content">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">正在准备小主的菜肴...</div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
 import { ref } from 'vue'
 import { getBearerToken } from '../../utils/cozeApi.js'
-import { addDishes, Dish, dishes } from '../../utils/data.js'
+import { addDishes, Dish, getAllDishes } from '../../utils/data.js'
+import { addFeishuRecord } from '../../utils/feishuApi.js'
 
 // 响应式数据
 const dishName = ref('') // 菜品名称
 const showModal = ref(false) // 弹窗显示状态
 const modalText = ref('') // 弹窗文本内容
+const isLoading = ref(false) // 加载状态
 
 /**
  * 调用扣子工作流
@@ -145,15 +155,20 @@ const callCozeWorkflow = async (dishName) => {
 const handleIconClick = async () => {
   if (!dishName.value.trim()) return
   
+  // 显示等待弹窗
+  isLoading.value = true
+  
   const inputDishName = dishName.value.trim()
   
   // 使用搜索中的去重逻辑检查菜品是否存在
-  const isDuplicate = checkDishDuplicate(inputDishName)
+  const isDuplicate = await checkDishDuplicate(inputDishName)
   
   if (isDuplicate) {
     // 显示马卡龙配色弹窗
     showModal.value = true
     modalText.value = '小主！这道菜御膳房已经备了！'
+    // 隐藏等待弹窗
+    isLoading.value = false
   } else {
     // 调用扣子工作流
     try {
@@ -170,48 +185,102 @@ const handleIconClick = async () => {
         
         // 转换工作流返回的数据格式为 Dish 对象
         const newDishes = workflowOutput.map(item => {
-          // 解析 CSV 格式的字符串，如 "荤菜, 猪肚,https://s.coze.cn/t/YgjhPuhspfY/"
+          // 解析 CSV 格式的字符串，如 "荤菜, 猪肚, 清炒猪肚, https://s.coze.cn/t/YgjhPuhspfY/"
+          // 正确格式：一级分类, 二级分类, 菜名, URL
           // 注意：有些行可能格式不正确，需要处理
           const parts = item.split(',');
-          if (parts.length < 3) {
-            console.error('无效的菜品数据格式:', item);
+          if (parts.length < 4) {
+            console.error('无效的菜品数据格式（期望4个字段）:', item);
             return null;
           }
           
           const category = parts[0].trim();
           const subCategory = parts[1].trim();
-          const url = parts[2].trim();
+          const dishName = parts[2].trim();
+          let url = parts[3].trim();
           
-          // 生成菜品名称（使用子分类作为菜品名称）
-          const name = subCategory;
+          // 确保URL是有效的字符串，处理可能的URL对象或字符串
+          if (typeof url === 'object' && url !== null) {
+            // 如果是对象，尝试提取URL字符串
+            if (url.link) {
+              // 处理 {"link":"url","text":"url"} 格式
+              url = url.link;
+            } else if (url.url) {
+              url = url.url;
+            } else if (url.uri) {
+              url = url.uri;
+            } else if (Array.isArray(url) && url[0]) {
+              const firstItem = url[0];
+              if (typeof firstItem === 'object' && firstItem !== null) {
+                url = firstItem.link || firstItem.url || firstItem.uri || '';
+              } else {
+                url = String(firstItem);
+              }
+            } else {
+              // 其他对象类型，尝试提取URL
+              const urlStr = JSON.stringify(url);
+              const urlMatch = urlStr.match(/https?:\/\/[^"\'\s\}]+/);
+              url = urlMatch ? urlMatch[0] : '';
+            }
+          }
+          
+          // 确保URL是字符串类型
+          url = String(url);
+          
+          // 清理URL，移除可能导致转换失败的字符
+          url = url.trim();
+          url = url.replace(/[\s"'<>]/g, ''); // 移除空格、引号和尖括号
+          
+          // 简化URL验证，只检查是否包含有效的协议头
+          const urlRegex = /^(http|https):\/\//i;
+          if (!urlRegex.test(url)) {
+            console.error('无效的URL格式，缺少协议头，使用默认图片URL:', url);
+            // 使用默认图片URL作为备选
+            url = 'https://via.placeholder.com/200x200?text=No+Image';
+          }
+          
+          console.log('处理后的URL:', url);
+          console.log('URL是否包含有效的协议头:', urlRegex.test(url));
+          
+          // 使用正确的菜名作为菜品名称
+          const name = dishName;
           
           return {
             name: name,
             category: category,
             subCategory: subCategory,
-            ingredients: [subCategory], // 简化处理，使用子分类作为食材
-            description: `${category} - ${subCategory}`,
-            imageUrl: url
+            ingredients: [dishName], // 使用正确的菜名作为食材
+            description: `${category} - ${subCategory} - ${dishName}`,
+            imageUrl: String(url)
           };
         }).filter(dish => dish !== null); // 过滤掉无效数据
         
         console.log('转换后的菜品数据:', newDishes);
         
-        // 批量添加菜品到菜单数据库
-        const addedCount = addDishes(newDishes);
+        // 将菜品数据添加到飞书表格
+        let addedToFeishuCount = 0;
+        for (const dish of newDishes) {
+          try {
+            await addFeishuRecord(dish);
+            addedToFeishuCount++;
+          } catch (error) {
+            console.error('添加到飞书表格失败:', error);
+          }
+        }
         
-        if (addedCount > 0) {
-          console.log(`成功添加 ${addedCount} 道菜品到菜单数据库`);
+        // 不再添加到本地数据库，直接显示成功消息
+        if (addedToFeishuCount > 0) {
+          console.log(`成功将 ${addedToFeishuCount} 道菜品添加到飞书表格`);
           // 显示马卡龙配色弹窗
           showModal.value = true;
           modalText.value = '小主，新菜菜已经入库啦！';
           // 清空输入框
           dishName.value = '';
         } else {
-          console.log('没有添加新菜品，可能已存在');
+          console.log('没有添加新菜品到飞书表格');
           // 显示提示弹窗
           showModal.value = true;
-          modalText.value = '小主，这些菜御膳房已经备了！';
+          modalText.value = '小主，添加菜品到飞书表格失败！';
         }
       }
     } catch (error) {
@@ -219,6 +288,9 @@ const handleIconClick = async () => {
       // 显示错误提示弹窗
       showModal.value = true
       modalText.value = '小主，网络有点不给力，稍后再试试吧！'
+    } finally {
+      // 隐藏等待弹窗
+      isLoading.value = false
     }
   }
 }
@@ -227,7 +299,7 @@ const handleIconClick = async () => {
  * 检查菜品是否重复
  * 使用与搜索相同的去重逻辑
  */
-const checkDishDuplicate = (inputName) => {
+const checkDishDuplicate = async (inputName) => {
   if (!inputName) return false
   
   // 生成去重键：使用原始名称，但将常见的烹饪方法替换为空格，然后按字符排序
@@ -242,12 +314,19 @@ const checkDishDuplicate = (inputName) => {
   
   const inputKey = getDeduplicationKey(inputName)
   
-  // 遍历现有菜品数据，检查是否有重复
-  for (const dish of dishes) {
-    const dishKey = getDeduplicationKey(dish.name)
-    if (inputKey === dishKey) {
-      return true
+  try {
+    // 从飞书表格获取所有菜品数据
+    const allDishes = await import('../../utils/feishuApi.js').then(module => module.getFeishuDishes())
+    
+    // 遍历现有菜品数据，检查是否有重复
+    for (const dish of allDishes) {
+      const dishKey = getDeduplicationKey(dish.name)
+      if (inputKey === dishKey) {
+        return true
+      }
     }
+  } catch (error) {
+    console.error('从飞书表格获取数据失败:', error)
   }
   
   return false
@@ -345,8 +424,56 @@ const checkDishDuplicate = (inputName) => {
   transform: scale(1.1);
 }
 
-/* 马卡龙配色弹窗 */
-.macaron-modal {
+/* 等待弹窗样式 - 马卡龙配色 */
+.loading-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.3); /* 半透明背景 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.loading-content {
+  background-color: #FFE6F0; /* 马卡龙淡粉色 */
+  border-radius: 30rpx; /* 更大的圆角 */
+  padding: 50rpx;
+  text-align: center;
+  box-shadow: 0 8rpx 30rpx rgba(255, 107, 107, 0.2); /* 粉色阴影 */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 30rpx;
+  border: 2rpx solid #FFB3C6; /* 粉色边框 */
+}
+
+.loading-spinner {
+  width: 70rpx;
+  height: 70rpx;
+  border: 8rpx solid #FFD6E0; /* 马卡龙浅粉色 */
+  border-top: 8rpx solid #FF8090; /* 马卡龙粉色 */
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading-text {
+  font-size: 34rpx;
+  color: #FF6B6B; /* 马卡龙红色 */
+  font-weight: 500;
+  text-shadow: 1rpx 1rpx 2rpx rgba(255, 107, 107, 0.3); /* 文字阴影 */
+}
+
+/* 自定义确认框样式 */
+.custom-confirm {
   position: fixed;
   top: 0;
   left: 0;
@@ -354,8 +481,8 @@ const checkDishDuplicate = (inputName) => {
   height: 100%;
   background-color: rgba(0, 0, 0, 0.5);
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
   z-index: 1000;
 }
 

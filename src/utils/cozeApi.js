@@ -4,7 +4,7 @@
 // 配置信息
 const COZE_CONFIG = {
   // API基础URL - 使用Vite代理，避免CORS问题
-  API_BASE_URL: '/api/coze/',
+  API_BASE_URL: (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_COZE_BASE_URL) || '/api/coze/',
   // 聊天API端点 - 参考Coze API文档（使用v3版本）
   CHAT_API: 'v3/chat',
   // 智能体ID - 参考curl和SDK示例
@@ -20,18 +20,21 @@ const COZE_CONFIG = {
  */
 export const getBearerToken = async () => {
   try {
-    // 从环境变量获取Coze API密钥
-    const token = import.meta.env.VITE_COZE_API_KEY;
+    // 从环境变量获取Coze API密钥，添加安全检查
+    const token = typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_COZE_API_KEY ? import.meta.env.VITE_COZE_API_KEY : '';
     
     // 检查token是否有效
-    if (!token || !token.trim()) {
-      throw new Error('Coze API密钥未配置，请在.env文件中设置VITE_COZE_API_KEY');
+    if (token && token.trim()) {
+      return token;
+    } else {
+      // 不抛出错误，返回空字符串让调用者处理
+      console.warn('Coze API密钥未配置或无效，请在.env文件中设置有效的VITE_COZE_API_KEY');
+      return '';
     }
-    
-    return token;
   } catch (error) {
     console.error('获取Bearer Token失败:', error);
-    throw error;
+    // 返回空字符串，避免整个应用崩溃
+    return '';
   }
 }
 

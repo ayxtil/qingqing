@@ -60,8 +60,9 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
+import { getFeishuOrders, updateFeishuOrderStatus, addFeishuOrder } from '../../../utils/feishuApi.js'
 
 const router = useRouter()
 
@@ -77,53 +78,58 @@ const dishes = ref([])
 const showConfirm = ref(false)
 const selectedStatus = ref({})
 const currentDish = ref(null)
+// 轮询定时器
+let pollTimer = null
+// 轮询间隔（毫秒）
+const POLL_INTERVAL = 30000 // 30秒
 
-// 初始化选中状态
-onMounted(() => {
-  // 初始化selectedStatus，默认状态为待处理
-  dishes.value.forEach(dish => {
-    selectedStatus.value[dish.id] = 'pending'
-  })
-})
-
-// 从localStorage加载菜品数据
-const loadDishesFromStorage = () => {
-  const storedOrders = localStorage.getItem('femaleOrders')
-  if (storedOrders) {
-    const ordersData = JSON.parse(storedOrders)
+// 从飞书表格加载菜品数据
+const loadDishesFromFeishu = async () => {
+  try {
+    console.log('从飞书表格加载菜品数据...')
+    // 从飞书获取订单数据
+    const orders = await getFeishuOrders()
     
-    // 将订单数据转换为单个菜品数据
-    const allDishes = []
-    ordersData.forEach(order => {
-      order.items.forEach(item => {
-        // 按数量展开，每道菜一张卡片
-        for (let i = 0; i < item.quantity; i++) {
-          allDishes.push({
-            id: `${order.id}-${item.id}-${i}`,
-            name: item.name,
-            status: order.status,
-            statusText: order.statusText,
-            createTime: order.createTime,
-            time: new Date(order.createTime).toLocaleString('zh-CN', {
-              month: '2-digit',
-              day: '2-digit',
-              hour: '2-digit',
-              minute: '2-digit'
-            }),
-            price: item.price
-          })
-        }
-      })
+    // 过滤掉状态为"驳回/删除"的订单
+    const validOrders = orders.filter(order => order.status !== 'rejected')
+    
+    // 转换为当前的dishes数据结构
+    dishes.value = validOrders.map(order => {
+      return {
+        id: order.id,
+        name: order.name,
+        status: order.status,
+        statusText: order.status,
+        createTime: order.createTime,
+        time: order.time,
+        price: '一个亲亲' // 使用默认价格
+      }
     })
     
-    dishes.value = allDishes
+    // 初始化selectedStatus
+    dishes.value.forEach(dish => {
+      selectedStatus.value[dish.id] = dish.status || 'pending'
+    })
     
-    // 菜品数据加载后，初始化selectedStatus，默认状态为待处理
-    setTimeout(() => {
-      dishes.value.forEach(dish => {
-        selectedStatus.value[dish.id] = 'pending'
-      })
-    }, 0)
+    console.log(`从飞书表格加载了 ${dishes.value.length} 条有效订单数据`)
+  } catch (error) {
+    console.error('从飞书表格加载菜品数据失败:', error)
+  }
+}
+
+// 启动定时轮询
+const startPolling = () => {
+  console.log('启动订单数据轮询，间隔', POLL_INTERVAL / 1000, '秒')
+  stopPolling() // 先停止已有定时器，避免重复启动
+  pollTimer = setInterval(loadDishesFromFeishu, POLL_INTERVAL)
+}
+
+// 停止定时轮询
+const stopPolling = () => {
+  if (pollTimer) {
+    console.log('停止订单数据轮询')
+    clearInterval(pollTimer)
+    pollTimer = null
   }
 }
 
@@ -145,17 +151,27 @@ const totalOwed = computed(() => {
 /**
  * 生命周期函数--监听页面加载
  */
-onMounted(() => {
+onMounted(async () => {
   console.log('清宫男厨师端首页加载')
-  loadDishesFromStorage()
+  // 从飞书表格加载数据
+  await loadDishesFromFeishu()
+  // 启动定时轮询
+  startPolling()
   
   // 调试信息
   console.log('当前日期:', new Date().toISOString().split('T')[0])
   console.log('所有菜品:', dishes.value)
   console.log('当天已完成菜品:', dishes.value.filter(dish => {
-    const dishDate = new Date(dish.createTime).toISOString().split('T')[0]
+    const dishDate = dish.createTime ? new Date(dish.createTime).toISOString().split('T')[0] : ''
     return dish.status === 'completed' && dishDate === new Date().toISOString().split('T')[0]
   }))
+})
+
+/**
+ * 组件卸载时停止轮询
+ */
+onBeforeUnmount(() => {
+  stopPolling()
 })
 
 /**
@@ -190,7 +206,7 @@ const navigateToInventory = () => {
 /**
  * 改变菜品状态
  */
-const changeOrderStatus = (dish) => {
+const changeOrderStatus = async (dish) => {
   const statusMap = {
     pending: '待处理',
     processing: '制作中',
@@ -208,17 +224,27 @@ const changeOrderStatus = (dish) => {
     // 恢复原来的状态，等待用户确认
     selectedStatus.value[dish.id] = dish.status
   } else {
-    // 其他状态直接更新
-    dish.status = selectedStatusValue
-    dish.statusText = statusMap[selectedStatusValue]
-    console.log(`菜品状态已更新为${dish.statusText}`)
+    // 其他状态直接更新飞书表格
+    try {
+      // 更新飞书表格中的订单状态
+      await updateFeishuOrderStatus(dish.id, selectedStatusValue)
+      
+      // 更新本地菜品状态
+      dish.status = selectedStatusValue
+      dish.statusText = statusMap[selectedStatusValue]
+      console.log(`菜品状态已更新为${dish.statusText}`)
+    } catch (error) {
+      console.error('更新飞书订单状态失败:', error)
+      // 恢复原来的状态
+      selectedStatus.value[dish.id] = dish.status
+    }
   }
 }
 
 /**
  * 处理驳回操作
  */
-const handleReject = () => {
+const handleReject = async () => {
   if (currentDish.value && currentDish.value.name) {
     // 将菜肴名称复制到剪贴板
     navigator.clipboard.writeText(currentDish.value.name)
@@ -229,8 +255,8 @@ const handleReject = () => {
         console.error('复制失败:', err)
       })
     
-    // 删除该菜肴
-    deleteDish(currentDish.value)
+    // 更新飞书表格中的订单状态为"驳回/删除"
+    await handleStatusChange(currentDish.value, 'rejected')
   }
   showConfirm.value = false
   currentDish.value = null
@@ -239,68 +265,37 @@ const handleReject = () => {
 /**
  * 处理删除操作
  */
-const handleDelete = () => {
+const handleDelete = async () => {
   if (currentDish.value) {
-    // 直接删除该菜肴
-    deleteDish(currentDish.value)
+    // 更新飞书表格中的订单状态为"驳回/删除"
+    await handleStatusChange(currentDish.value, 'rejected')
   }
   showConfirm.value = false
   currentDish.value = null
 }
 
 /**
- * 删除单个菜肴
+ * 处理订单状态变更
  */
-const deleteDish = (dish) => {
-  // 从localStorage中获取订单数据
-  const storedOrders = localStorage.getItem('femaleOrders')
-  if (storedOrders) {
-    let allOrders = JSON.parse(storedOrders)
+const handleStatusChange = async (dish, status) => {
+  try {
+    // 更新飞书表格中的订单状态
+    await updateFeishuOrderStatus(dish.id, status)
     
-    // 创建新的菜品列表，移除当前菜品
+    // 从列表中移除该菜品
     const updatedDishes = dishes.value.filter(d => d.id !== dish.id)
-    
-    // 更新内存中的菜品数据
     dishes.value = updatedDishes
-    
-    // 更新localStorage中的订单数据
-    // 从菜品ID中提取原始订单ID和菜品索引
-    const [originalOrderId, itemId, index] = dish.id.split('-')
-    
-    // 查找原始订单
-    const orderIndex = allOrders.findIndex(order => order.id === originalOrderId)
-    if (orderIndex !== -1) {
-      const originalOrder = allOrders[orderIndex]
-      
-      // 查找原始订单中的菜品
-      const itemIndex = originalOrder.items.findIndex(item => item.id === itemId)
-      if (itemIndex !== -1) {
-        // 如果菜品数量大于1，减少数量
-        if (originalOrder.items[itemIndex].quantity > 1) {
-          originalOrder.items[itemIndex].quantity--
-          originalOrder.totalItems--
-          originalOrder.totalPrice = `${originalOrder.totalItems}个亲亲`
-        } else {
-          // 否则删除该菜品
-          originalOrder.items.splice(itemIndex, 1)
-          originalOrder.totalItems--
-          originalOrder.totalPrice = `${originalOrder.totalItems}个亲亲`
-          
-          // 如果订单中没有菜品了，删除整个订单
-          if (originalOrder.items.length === 0) {
-            allOrders.splice(orderIndex, 1)
-          }
-        }
-        
-        // 保存更新后的订单数据
-        localStorage.setItem('femaleOrders', JSON.stringify(allOrders))
-      }
-    }
     
     // 重新初始化selectedStatus
     dishes.value.forEach(d => {
       selectedStatus.value[d.id] = d.status
     })
+    
+    console.log(`菜品状态已更新为${status}`)
+  } catch (error) {
+    console.error('更新飞书订单状态失败:', error)
+    // 恢复原来的状态
+    selectedStatus.value[dish.id] = dish.status
   }
 }
 </script>

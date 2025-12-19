@@ -5,7 +5,7 @@ import { resolve } from 'path'
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  base: '/qingqing/',
+  base: './',
   plugins: [vue()],
   resolve: {
     alias: {
@@ -22,12 +22,17 @@ export default defineConfig({
       '127.0.0.1'
     ],
     cors: true,
-    // 添加代理配置，解决Coze API的CORS问题
+    // 添加代理配置，解决API的CORS问题
     proxy: {
       '/api/coze': {
         target: 'https://api.coze.cn',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api\/coze/, '')
+      },
+      '/api/feishu': {
+        target: 'https://open.larksuite.com',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/feishu/, '')
       }
     }
   },
@@ -62,8 +67,6 @@ export default defineConfig({
     // 配置资源预加载和动态导入的基础路径
     rollupOptions: {
       output: {
-        // 确保所有模块都被正确打包，避免运行时请求源码
-        manualChunks: undefined,
         // 确保生成的文件名包含哈希，避免缓存问题
         assetFileNames: 'assets/[name].[hash:8].[ext]',
         chunkFileNames: 'assets/[name].[hash:8].js',

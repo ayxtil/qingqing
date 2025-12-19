@@ -1,14 +1,24 @@
 <template>
-  <!-- 清宫女食客端首页 -->
+  <!-- 翻牌子页面 -->
   <div class="qing-female-index">
-    <!-- 背景粒子效果 -->
+    <!-- 粒子效果 -->
     <div class="particles-container">
-      <div class="particle" v-for="(particle, index) in particles" :key="index" :style="{
-        left: `${particle.left}%`, 
-        top: `${particle.top}%`, 
-        animationDelay: `${particle.delay}ms`, 
+      <div v-for="(particle, index) in particles" :key="index" class="particle" :style="{
+        left: `${particle.left}%`,
+        top: `${particle.top}%`,
+        animationDelay: `${particle.delay}ms`,
         animationDuration: `${particle.duration}ms`
       }"></div>
+    </div>
+    
+    <!-- 更新提示 -->
+    <div v-if="hasNewData" class="update-notification">
+      数据已更新，展示最新菜肴！
+    </div>
+    
+    <!-- 更新中提示 -->
+    <div v-if="isUpdating" class="updating-notification">
+      检查更新中...
     </div>
 
     <!-- 自定义导航栏 -->
@@ -158,9 +168,10 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted, watch, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
-import { loadDishData } from '../../../utils/dataManager.js'
+import { loadDishData, checkForUpdates } from '../../../utils/dataManager.js'
+import { addFeishuOrder } from '../../../utils/feishuApi.js'
 
 const router = useRouter()
 
@@ -177,10 +188,17 @@ const openDropdown = ref(null) // 当前打开的下拉菜单
 const particles = ref([])
 // 加载状态
 const isLoading = ref(false)
+// 更新状态
+const isUpdating = ref(false)
+const hasNewData = ref(false)
 // 购物车数据
 const cart = ref([]) // 购物车商品列表
 const cartCount = ref(0) // 购物车商品数量
 const isCartPanelVisible = ref(false) // 购物车面板显示状态
+// 轮询定时器
+let pollTimer = null
+// 轮询间隔（毫秒）
+const POLL_INTERVAL = 30000 // 30秒
 
 // 从localStorage加载购物车数据
 const loadCartFromStorage = () => {
@@ -214,6 +232,17 @@ const categories = ref([
 // 二级分类映射
 const subCategoriesMap = ref(new Map())
 
+// 智能判断是否为水产品
+const isAquaticProduct = (dish) => {
+  // 水产品关键词列表
+  const aquaticKeywords = ['海鲜', '鱼', '虾', '蟹', '贝', '螺', '鲍', '参', '蛎', '蛤', '蛏', '鱿', '章鱼', '墨鱼', '海蜇', '海带', '紫菜', '海藻']
+  
+  // 检查菜品名称、分类是否包含水产品关键词
+  const dishText = `${dish.category} ${dish.subCategory} ${dish.name}`.toLowerCase()
+  
+  return aquaticKeywords.some(keyword => dishText.includes(keyword))
+}
+
 // 初始化二级分类映射
 const initSubCategoriesMap = () => {
   const map = new Map()
@@ -223,13 +252,19 @@ const initSubCategoriesMap = () => {
     let category = dish.category
     let subCategory = dish.subCategory
     
-    // 特殊处理：将海鲜和汤合并为其他分类
-    if (category === '海鲜') {
+    // 智能分类处理
+    if (category === '汤') {
+      // 所有一级分类为汤的菜品，都归到其他分类下的汤
       category = '其他'
-      subCategory = '鱼鲜' // 海鲜对应鱼鲜
-    } else if (category === '汤') {
+      subCategory = '汤'
+    } else if (isAquaticProduct(dish)) {
+      // 所有水产品，都归到其他分类下的鱼鲜
       category = '其他'
-      subCategory = '汤' // 汤保持不变
+      subCategory = '鱼鲜'
+    } else if (category === '海鲜') {
+      // 兼容原有逻辑，将海鲜归到其他分类下的鱼鲜
+      category = '其他'
+      subCategory = '鱼鲜'
     }
     
     if (!map.has(category)) {
@@ -241,6 +276,68 @@ const initSubCategoriesMap = () => {
 }
 
 /**
+ * 处理飞书表格更新
+ */
+const handleUpdate = async () => {
+  try {
+    isUpdating.value = true
+    hasNewData.value = false
+    
+    // 检查是否有更新
+    const hasUpdate = await checkForUpdates()
+    
+    if (hasUpdate) {
+      console.log('检测到飞书表格更新，重新加载菜品数据...')
+      // 重新加载菜品数据
+      const dishes = await loadDishData()
+      
+      // 更新页面数据
+      allDishes.value = dishes
+      initSubCategoriesMap()
+      filterDishes(searchQuery.value, selectedCategory.value, selectedSubCategory.value)
+      
+      hasNewData.value = true
+      console.log('菜品数据已更新')
+      
+      // 3秒后隐藏更新提示
+      setTimeout(() => {
+        hasNewData.value = false
+      }, 3000)
+    }
+  } catch (error) {
+    console.error('处理更新失败:', error)
+  } finally {
+    isUpdating.value = false
+  }
+}
+
+/**
+ * 启动定时轮询
+ */
+const startPolling = () => {
+  console.log('======== 启动飞书表格轮询 ========')
+  console.log('轮询间隔:', POLL_INTERVAL / 1000, '秒')
+  stopPolling() // 先停止已有定时器，避免重复启动
+  pollTimer = setInterval(handleUpdate, POLL_INTERVAL)
+  console.log('轮询定时器ID:', pollTimer)
+  console.log('==============================')
+}
+
+/**
+ * 停止定时轮询
+ */
+const stopPolling = () => {
+  if (pollTimer) {
+    console.log('======== 停止飞书表格轮询 ========')
+    console.log('停止轮询定时器，ID:', pollTimer)
+    clearInterval(pollTimer)
+    pollTimer = null
+    console.log('轮询已停止')
+    console.log('==============================')
+  }
+}
+
+/**
  * 生命周期函数--监听页面加载
  */
 onMounted(() => {
@@ -249,6 +346,16 @@ onMounted(() => {
   loadDishes()
   // 加载购物车数据
   loadCartFromStorage()
+  // 启动定时轮询
+  startPolling()
+})
+
+/**
+ * 生命周期函数--监听页面卸载
+ */
+onBeforeUnmount(() => {
+  // 停止定时轮询，防止内存泄漏
+  stopPolling()
 })
 
 /**
@@ -384,8 +491,17 @@ const filterDishes = (query, category, subCategory) => {
   // 按一级分类过滤（只有当category有值时才过滤）
   if (category) {
     if (category === '其他') {
-      // 特殊处理：其他分类包含海鲜和汤
-      filtered = filtered.filter(dish => dish.category === '海鲜' || dish.category === '汤')
+      // 特殊处理：其他分类包含汤、海鲜和智能判断的水产品
+      filtered = filtered.filter(dish => {
+        // 一级分类为汤的菜品
+        const isSoup = dish.category === '汤'
+        // 一级分类为海鲜的菜品
+        const isSeafood = dish.category === '海鲜'
+        // 智能判断为水产品的菜品
+        const isAquatic = isAquaticProduct(dish)
+        
+        return isSoup || isSeafood || isAquatic
+      })
     } else {
       // 普通一级分类过滤
       filtered = filtered.filter(dish => dish.category === category)
@@ -396,8 +512,10 @@ const filterDishes = (query, category, subCategory) => {
       if (category === '其他') {
         // 特殊处理：其他分类下的二级分类
         if (subCategory === '鱼鲜') {
-          // 鱼鲜对应海鲜
-          filtered = filtered.filter(dish => dish.category === '海鲜')
+          // 鱼鲜对应海鲜和智能判断的水产品
+          filtered = filtered.filter(dish => {
+            return dish.category === '海鲜' || isAquaticProduct(dish)
+          })
         } else if (subCategory === '汤') {
           // 汤对应汤
           filtered = filtered.filter(dish => dish.category === '汤')
@@ -410,14 +528,14 @@ const filterDishes = (query, category, subCategory) => {
   }
   
   // 按关键词过滤
-  if (query.trim()) {
+  if (query && query.trim()) {
     const lowerQuery = query.toLowerCase()
     // 搜索所有分类，包括汤和海鲜
     filtered = allDishes.value.filter(dish => {
-      // 检查菜品名称、描述和配料是否包含关键词
-      return dish.name.toLowerCase().includes(lowerQuery) ||
-             dish.description.toLowerCase().includes(lowerQuery) ||
-             dish.ingredients.some(ingredient => ingredient.toLowerCase().includes(lowerQuery))
+      // 检查菜品名称、描述和配料是否包含关键词，添加空值检查
+      return (dish.name && dish.name.toLowerCase().includes(lowerQuery)) ||
+             (dish.description && dish.description.toLowerCase().includes(lowerQuery)) ||
+             (dish.ingredients && dish.ingredients.some(ingredient => ingredient && ingredient.toLowerCase().includes(lowerQuery)))
     })
   }
   
@@ -528,7 +646,7 @@ const updateItemQuantity = (item, change) => {
 /**
  * 下单功能
  */
-const placeOrder = () => {
+const placeOrder = async () => {
   if (cartCount.value === 0) {
     console.log('购物车为空，无法下单')
     return
@@ -569,6 +687,23 @@ const placeOrder = () => {
   localStorage.setItem('femaleOrders', JSON.stringify(orders))
   console.log('订单已保存到本地存储:', order)
   
+  // 向飞书表格添加记录
+  for (const item of cart.value) {
+    for (let i = 0; i < item.quantity; i++) {
+      try {
+        // 向飞书表格添加记录
+        await addFeishuOrder({
+          name: item.name,
+          createTime: new Date().toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' }),
+          status: 'pending' // 初始状态设为待处理
+        })
+        console.log(`已向飞书表格添加记录: ${item.name}`)
+      } catch (error) {
+        console.error('向飞书表格添加记录失败:', error)
+      }
+    }
+  }
+  
   // 清空购物车
   cart.value = []
   updateCartCount()
@@ -588,8 +723,8 @@ const placeOrder = () => {
  * @param {Object} dish - 菜品对象
  */
 const onImageError = (event, dish) => {
-  console.error(`图片加载失败: ${dish.imageUrl}`)
-  // 使用默认图片替换失败的图片
+  console.error(`图片加载失败: ${JSON.stringify(dish.imageUrl)}`)
+  // 使用picsum.photos服务提供默认图片
   event.target.src = `https://picsum.photos/200/200?random=${dish.id}`
   // 更新菜品对象中的图片URL，避免下次加载时再次失败
   dish.imageUrl = event.target.src
@@ -614,7 +749,7 @@ const onImageError = (event, dish) => {
   pointer-events: none;
   z-index: 0;
 }
-
+/* 粒子效果 */
 .particle {
   position: absolute;
   width: 4px;
@@ -623,6 +758,52 @@ const onImageError = (event, dish) => {
   border-radius: 50%;
   animation: float 6s infinite ease-in-out;
   opacity: 0.6;
+}
+
+/* 更新提示样式 - 马卡龙配色 */
+.update-notification {
+  position: fixed;
+  top: 20rpx;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #FFE6F0; /* 马卡龙淡粉色 */
+  color: #FF6B6B; /* 马卡龙红色 */
+  padding: 15rpx 30rpx;
+  border-radius: 25rpx;
+  box-shadow: 0 4rpx 15rpx rgba(255, 107, 107, 0.2);
+  font-size: 28rpx;
+  font-weight: bold;
+  z-index: 1000;
+  animation: slideDown 0.3s ease-out;
+}
+
+/* 更新中提示样式 - 马卡龙配色 */
+.updating-notification {
+  position: fixed;
+  top: 20rpx;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #E6F7FF; /* 马卡龙淡蓝色 */
+  color: #66BFFF; /* 马卡龙蓝色 */
+  padding: 15rpx 30rpx;
+  border-radius: 25rpx;
+  box-shadow: 0 4rpx 15rpx rgba(102, 191, 255, 0.2);
+  font-size: 28rpx;
+  font-weight: bold;
+  z-index: 1000;
+  animation: slideDown 0.3s ease-out;
+}
+
+/* 滑入动画 */
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-20rpx);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
 }
 
 @keyframes float {
