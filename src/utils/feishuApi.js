@@ -428,33 +428,39 @@ export async function getFeishuOrders() {
       let createTime = fields['创建时间'] || '';
       let time = '';
       
+      // 获取当前北京时间作为默认值
+      const now = new Date();
+      const defaultTimeStr = now.toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' });
+      
       // 尝试转换创建时间为北京时间字符串
       if (createTime) {
         try {
-          const date = new Date(createTime);
+          // 确保createTime是字符串
+          const timeStr = String(createTime);
+          
+          // 验证时间字符串是否有效
+          const date = new Date(timeStr);
           if (!isNaN(date.getTime())) {
             // 明确指定时区为Asia/Shanghai（北京时间）
             time = date.toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' });
             // 确保存储的createTime也是北京时间格式
-            createTime = date.toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' });
+            createTime = time;
           } else {
             // 如果是无效的时间值，使用当前北京时间
-            const now = new Date();
-            createTime = now.toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' });
-            time = createTime;
+            console.warn('无效的时间值，使用当前时间:', timeStr);
+            createTime = defaultTimeStr;
+            time = defaultTimeStr;
           }
         } catch (error) {
           console.error('转换创建时间失败:', error);
           // 使用当前北京时间作为默认值
-          const now = new Date();
-          createTime = now.toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' });
-          time = createTime;
+          createTime = defaultTimeStr;
+          time = defaultTimeStr;
         }
       } else {
         // 如果创建时间为空，使用当前北京时间
-        const now = new Date();
-        createTime = now.toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' });
-        time = createTime;
+        createTime = defaultTimeStr;
+        time = defaultTimeStr;
       }
       
       return {

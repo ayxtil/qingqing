@@ -74,9 +74,13 @@ export default defineConfig({
         // 自动过滤中文/空格/括号，替换为下划线
         sanitizeFileName: (name) => {
           return name.replace(/[\u4e00-\u9fa5\s\(\)]/g, '_');
-        }
+        },
+        // 确保正确的MIME类型设置
+        manualChunks: undefined // 使用默认的代码分割
       }
-    }
+    },
+    // 确保生成一致的构建输出
+    sourcemap: false
   },
   // 图片优化配置
   optimizeDeps: {
