@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>卿卿吃什么</title>
+  <link rel="icon" type="image/png" href="/qingqing/assets/avatar.CRolzhYO.png">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      background-color: #ffffff;
+      color: #333333;
+    }
+    #app {
+      width: 100%;
+      margin: 0 auto;
+      min-height: 100vh;
+      background-color: #ffffff;
+    }
+  </style>
+  <!-- 移除直接的CSS引用，让Vite在构建时处理所有样式 -->
+  
+  <!-- Import Map：解决浏览器无法解析裸模块名的问题 -->
+  <!-- 开发环境下，Vite会自动忽略此配置，使用自己的模块解析 -->
+  <!-- 直接打开时，浏览器会使用此映射加载Vue模块 -->
+
+  <script type="importmap">
+    {
+      "imports": {
+        "vue": "https://unpkg.com/vue@3/dist/vue.esm-browser.js",
+        "vue-router": "https://unpkg.com/vue-router@4/dist/vue-router.esm-browser.js"
+      }
+    }
+  </script>
+  <script type="module" crossorigin src="/qingqing/assets/index.CJzQ3sxs.js"></script>
+  <link rel="stylesheet" crossorigin href="/qingqing/assets/index.BR6n5J-U.css">
+</head>
+<body>
+  <div id="app"></div>
+  
+  <!-- 开发环境：通过 Vite 服务器访问时，此脚本会被 Vite 替换为构建后的脚本 -->
+  <!-- 生产环境：请访问 dist/index.html，该文件包含构建后的脚本 -->
+  <!-- 直接打开此文件会导致错误，因为浏览器无法直接执行 .vue 源文件 -->
+</body>
+</html>
