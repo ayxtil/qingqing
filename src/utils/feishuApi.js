@@ -2,7 +2,7 @@
 
 // 飞书API配置
 const FEISHU_CONFIG = {
-  baseUrl: '/api/feishu/open-apis', // 使用Vite配置的代理URL，包含完整的/api/feishu前缀和/open-apis后缀
+  baseUrl: 'https://open.larksuite.com/open-apis', // 直接使用飞书API完整URL，避免GitHub Pages上的代理问题
   appId: 'cli_a9ae903f207bdbcb',
   appSecret: 'DLR7udnlQ8uDfyU9DPNhVeV1F6xKZoLs',
   // 菜肴数据表格配置
