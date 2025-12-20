@@ -60,7 +60,7 @@ export default defineConfig({
     }
   },
   build: {
-    outDir: 'dist',
+    outDir: 'dist', // 将构建输出目录改回dist
     assetsDir: 'assets',
     minify: 'terser',
     assetsInlineLimit: 0, // 禁止所有资源内联，确保所有图片都输出为单独文件
